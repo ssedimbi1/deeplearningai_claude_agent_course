@@ -1,0 +1,63 @@
+# Query Flow Diagram
+
+```mermaid
+sequenceDiagram
+    actor User
+    participant UI as Frontend (script.js)
+    participant API as FastAPI (app.py)
+    participant RAG as RAGSystem (rag_system.py)
+    participant Session as SessionManager
+    participant AI as AIGenerator (ai_generator.py)
+    participant Claude as Claude API
+    participant Tools as ToolManager / CourseSearchTool
+    participant DB as ChromaDB (vector_store.py)
+
+    User->>UI: Types question, hits Enter
+    UI->>UI: Render user message + loading spinner
+
+    UI->>API: POST /api/query {query, session_id}
+
+    API->>Session: create_session() if no session_id
+    Session-->>API: session_id
+
+    API->>RAG: query(query, session_id)
+
+    RAG->>Session: get_conversation_history(session_id)
+    Session-->>RAG: formatted prior exchanges (or null)
+
+    RAG->>AI: generate_response(prompt, history, tools)
+
+    Note over AI,Claude: First API call — decide to answer or search
+    AI->>Claude: messages=[{user: query}]<br/>system=SYSTEM_PROMPT + history<br/>tools=[search_course_content]
+
+    alt Claude answers directly (general knowledge)
+        Claude-->>AI: stop_reason="end_turn", text answer
+        AI-->>RAG: answer text
+    else Claude decides to search (course-specific)
+        Claude-->>AI: stop_reason="tool_use"<br/>tool: search_course_content(query, course_name?, lesson_number?)
+
+        AI->>Tools: execute_tool("search_course_content", ...)
+        Tools->>DB: search(query, course_name, lesson_number)
+        DB-->>Tools: ranked CourseChunks + metadata
+        Tools-->>AI: formatted results with [Course - Lesson N] headers<br/>(stores sources internally)
+
+        Note over AI,Claude: Second API call — generate grounded answer
+        AI->>Claude: messages=[user, assistant(tool_use), user(tool_result)]
+        Claude-->>AI: stop_reason="end_turn", synthesized answer
+        AI-->>RAG: answer text
+    end
+
+    RAG->>Tools: get_last_sources()
+    Tools-->>RAG: ["Course Title - Lesson N", ...]
+    RAG->>Tools: reset_sources()
+
+    RAG->>Session: add_exchange(session_id, query, answer)
+    RAG-->>API: (answer, sources)
+
+    API-->>UI: {answer, sources, session_id}
+
+    UI->>UI: Remove loading spinner
+    UI->>UI: Render answer as Markdown
+    UI->>UI: Show collapsible Sources section
+    UI->>UI: Store session_id for next message
+```
