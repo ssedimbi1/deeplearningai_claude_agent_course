@@ -132,6 +132,12 @@ header h1 {
   margin-bottom: 1.5rem;
 }
 
+.new-chat-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .sidebar-section:last-child {
   margin-bottom: 0;
 }
@@ -200,7 +206,7 @@ header h1 {
 
 /* Sidebar New Chat button */
 .new-chat-btn {
-  width: 100%;
+  flex: 1;
   padding: 0.625rem 1rem;
   background: var(--primary-color);
   border: none;
@@ -776,10 +782,7 @@ details[open] .suggested-header::before {
 
 /* Theme Toggle Button */
 .theme-toggle {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    z-index: 100;
+    flex-shrink: 0;
     width: 40px;
     height: 40px;
     border-radius: 50%;

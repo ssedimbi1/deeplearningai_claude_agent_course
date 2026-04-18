@@ -6,12 +6,18 @@
       "Bash(gh auth *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
-      "Bash(git worktree *)"
+      "Bash(git worktree *)",
+      "Bash(gh pr *)",
+      "Bash(git pull *)",
+      "Bash(./run.sh)",
+      "Bash(curl -s http://localhost:8000)"
     ]
   },
-
   "spinnerVerbs": {
     "mode": "replace",
-    "verbs": ["Thinking","Working"]
+    "verbs": [
+      "Thinking",
+      "Working"
+    ]
   }
 }
