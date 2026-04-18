@@ -1,6 +1,14 @@
 // API base URL - use relative path to work from any host
 const API_URL = '/api';
 
+// Theme management
+(function initTheme() {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    }
+})();
+
 // Global state
 let currentSessionId = null;
 let sessionVersion = 0;
@@ -24,7 +32,19 @@ document.addEventListener('DOMContentLoaded', () => {
   document
     .getElementById('newChatShortcut')
     .addEventListener('click', createNewSession);
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
 });
+
+function toggleTheme() {
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+    if (isLight) {
+        document.documentElement.removeAttribute('data-theme');
+        localStorage.setItem('theme', 'dark');
+    } else {
+        document.documentElement.setAttribute('data-theme', 'light');
+        localStorage.setItem('theme', 'light');
+    }
+}
 
 // Event Listeners
 function setupEventListeners() {
